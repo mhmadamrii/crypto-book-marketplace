@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+import { PT_Mono } from 'next/font/google';
 import '../index.css';
 import Providers from '@/components/providers';
 import Header from '@/components/header';
 
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
+const inc = PT_Mono({
+  weight: '400',
   subsets: ['latin'],
 });
 
@@ -21,7 +21,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang='en' suppressHydrationWarning>
-      <body className={`${geistMono.variable} antialiased`}>
+      <body className={`${inc.className} antialiased`}>
         <Providers>
           <div className='grid grid-rows-[auto_1fr] h-svh'>
             <Header />

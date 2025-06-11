@@ -27,7 +27,7 @@ contract BookMarketplace is Ownable, ReentrancyGuard {
 
     constructor() Ownable(msg.sender) {}
 
-    function listBook(
+    function addBook(
         string memory title,
         string memory cid,
         uint256 price
@@ -46,11 +46,23 @@ contract BookMarketplace is Ownable, ReentrancyGuard {
         require(msg.value == book.price, "Incorrect payment amount");
 
         payable(book.author).transfer(msg.value);
-        userPurchases[book.author].push(bookId);
+        userPurchases[msg.sender].push(bookId);
         emit BookPurchased(bookId, msg.sender);
     }
 
     function getMyBooks() external view returns (uint256[] memory) {
         return userPurchases[msg.sender];
+    }
+
+    function getAllBooks() external view returns (Book[] memory) {
+        Book[] memory result = new Book[](nextBookId);
+        for (uint i = 0; i < nextBookId; i++) {
+            result[i] = books[i];
+        }
+        return result;
+    }
+
+    function getBook(uint256 bookId) external view returns (Book memory) {
+        return books[bookId];
     }
 }
