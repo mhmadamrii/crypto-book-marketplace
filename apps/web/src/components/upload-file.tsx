@@ -22,6 +22,7 @@ export function UploadFile() {
         body: data,
       });
       const signedUrl = await uploadRequest.json();
+      console.log('signed url ipfs', signedUrl);
       setUrl(signedUrl);
       setUploading(false);
     } catch (e) {
