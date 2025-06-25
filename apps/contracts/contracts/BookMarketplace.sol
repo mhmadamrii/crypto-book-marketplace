@@ -7,9 +7,11 @@ import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 contract BookMarketplace is Ownable, ReentrancyGuard {
     struct Book {
         uint256 id;
-        address author;
+        address payable uploader;
+        address payable authorAddress;
         string title;
-        string cid;
+        string description;
+        string cid; // IPFS CID
         uint256 price;
     }
 
@@ -29,24 +31,43 @@ contract BookMarketplace is Ownable, ReentrancyGuard {
 
     function addBook(
         string memory title,
+        string memory description,
         string memory cid,
-        uint256 price
+        uint256 price,
+        address payable authorAddress
     ) external {
         require(price > 0, "Price must be greater than 0");
+        require(authorAddress != address(0), "Invalid author address");
 
         uint256 bookId = nextBookId++;
-        books[bookId] = Book(bookId, msg.sender, title, cid, price);
+        books[bookId] = Book(
+            bookId,
+            payable(msg.sender),
+            authorAddress,
+            title,
+            description,
+            cid,
+            price
+        );
 
         emit BookListed(bookId, msg.sender, title, price);
     }
 
     function purchaseBook(uint256 bookId) external payable nonReentrant {
         Book memory book = books[bookId];
-        require(book.author != address(0), "Book does not exist");
+
+        // Validate book existence
+        require(book.authorAddress != address(0), "Book does not exist");
+
+        // Validate payment
         require(msg.value == book.price, "Incorrect payment amount");
 
-        payable(book.author).transfer(msg.value);
+        // Transfer funds to the author
+        book.authorAddress.transfer(msg.value);
+
+        // Record purchase
         userPurchases[msg.sender].push(bookId);
+
         emit BookPurchased(bookId, msg.sender);
     }
 
