@@ -7,7 +7,7 @@ import { useReadContract } from 'wagmi';
 export default function Home() {
   const { data } = useReadContract({
     abi: ABI_BOOK_MARKETPLACE,
-    address: '0x5FbDB2315678afecb367f032d93F642f64180aa3',
+    address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as '0x',
     functionName: 'getAllBooks',
   });
 
@@ -28,24 +28,12 @@ export default function Home() {
       <section className='py-8'>
         <h2 className='text-2xl font-semibold mb-4'>Featured Books</h2>
         <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
-          <div className='rounded-lg border p-4'>
-            <h3 className='font-medium text-lg'>Mastering Bitcoin</h3>
-            <p className='text-sm text-gray-500'>
-              Unlocking Digital Cryptocurrencies
-            </p>
-          </div>
-          <div className='rounded-lg border p-4'>
-            <h3 className='font-medium text-lg'>The Internet of Money</h3>
-            <p className='text-sm text-gray-500'>
-              A collection of talks by Andreas Antonopoulos
-            </p>
-          </div>
-          <div className='rounded-lg border p-4'>
-            <h3 className='font-medium text-lg'>Programming Bitcoin</h3>
-            <p className='text-sm text-gray-500'>
-              Learn How to Program Bitcoin from Scratch
-            </p>
-          </div>
+          {data?.map((item, id) => (
+            <div key={id} className='rounded-lg border p-4'>
+              <h3 className='font-medium text-lg'>{item.title}</h3>
+              <p className='text-sm text-gray-500'>{item.description}</p>
+            </div>
+          ))}
         </div>
       </section>
 

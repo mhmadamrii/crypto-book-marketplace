@@ -1,10 +1,26 @@
 'use client';
 
+import { Button } from '@/components/ui/button';
 import { useState } from 'react';
+import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 import { UploadFile } from '@/components/upload-file';
 import { parseEther } from 'viem';
 import { toast } from 'sonner';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 import { ABI_BOOK_MARKETPLACE } from '@/lib/constants';
+
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 
 import {
   useWriteContract,
@@ -12,17 +28,24 @@ import {
   useAccount,
 } from 'wagmi';
 
-const CONTRACT_ADDRESS = '0x5FbDB2315678afecb367f032d93F642f64180aa3'; // Replace with your deployed contract address
+const FormSchema = z.object({
+  title: z.string().min(2, {
+    message: 'Title must be at least 2 characters.',
+  }),
+  desc: z.string().min(2, {
+    message: 'Description must be at least 2 characters.',
+  }),
+  price: z.coerce.number().min(1, {
+    message: 'Price must be at least 1 Wei.',
+  }),
+  authorAddress: z.string().regex(/^0x[a-fA-F0-9]{40}$/, {
+    message: 'Author address must be a valid Ethereum address (e.g., 0x...).',
+  }),
+});
 
 export default function Publish() {
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [price, setPrice] = useState('');
-  const [authorAddress, setAuthorAddress] = useState('');
-  const [cid, setCid] = useState('something');
-
   const { address, isConnected } = useAccount();
-  console.log('current address', address);
+  const [cid, setCid] = useState('');
 
   const {
     data: hash,
@@ -30,7 +53,6 @@ export default function Publish() {
     isPending: isWritePending,
     error: writeError,
   } = useWriteContract();
-  console.log('ispending', isWritePending);
 
   const {
     isLoading: isConfirming,
@@ -40,72 +62,129 @@ export default function Publish() {
     hash,
   });
 
-  const handlePublish = async () => {
-    if (!isConnected) {
-      toast.error('Please connect your wallet.');
-      return;
-    }
-    if (!title || !description || !price || !authorAddress || !cid) {
-      toast.error('Please fill in all fields and upload a file.');
-      return;
-    }
+  const form = useForm<z.infer<typeof FormSchema>>({
+    resolver: zodResolver(FormSchema),
+    defaultValues: {
+      title: '',
+      desc: '',
+      price: 0,
+      authorAddress: '',
+    },
+  });
 
+  function onSubmit(data: z.infer<typeof FormSchema>) {
     try {
       writeContract({
-        address: CONTRACT_ADDRESS,
+        address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as '0x',
         abi: ABI_BOOK_MARKETPLACE,
         functionName: 'addBook',
-        args: [title, description, cid, parseEther(price), authorAddress],
+        args: [
+          data.title,
+          data.desc,
+          cid,
+          parseEther(data.price.toString()),
+          data.authorAddress as '0x',
+        ],
       });
     } catch (e) {
       console.error('Error preparing transaction:', e);
       toast.error('Error preparing transaction.');
     }
-  };
+  }
+
+  console.log('current address', address);
 
   return (
-    <main className='h-screen flex flex-col items-center justify-center'>
+    <main className='min-h-screen flex flex-col items-center justify-center pb-16'>
       <div className='text-lg font-bold mb-4'>
         <h1>Publish your crypto book here!</h1>
       </div>
-      <div className='flex flex-col space-y-4 w-96'>
-        <input
-          type='text'
-          placeholder='Book Title'
-          className='border p-2 rounded'
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-        />
-        <textarea
-          placeholder='Book Description'
-          className='border p-2 rounded'
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-        />
-        <input
-          type='number'
-          placeholder='Price (in ETH)'
-          className='border p-2 rounded'
-          value={price}
-          onChange={(e) => setPrice(e.target.value)}
-        />
-        <input
-          type='text'
-          placeholder='Author Address'
-          className='border p-2 rounded'
-          value={authorAddress}
-          onChange={(e) => setAuthorAddress(e.target.value)}
-        />
-        <UploadFile onUploadSuccess={setCid} />
-        {cid && <p className='text-sm text-gray-600'>Uploaded CID: {cid}</p>}
-        <button
-          className='bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md cursor-pointer'
-          onClick={handlePublish}
-          // disabled={!title || !description || !price || !authorAddress || !cid || isWritePending || isConfirming}
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className='w-full sm:max-w-xl space-y-6'
         >
-          {isWritePending || isConfirming ? 'Publishing...' : 'Publish Book'}
-        </button>
-      </div>
+          <FormField
+            control={form.control}
+            name='title'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Book Title</FormLabel>
+                <FormControl>
+                  <Input placeholder='Crypto Beginner Guide' {...field} />
+                </FormControl>
+                <FormDescription>Your book title</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name='desc'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Description</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder='A crypto book that you need to read'
+                    className='resize-none'
+                    {...field}
+                  />
+                </FormControl>
+                <FormDescription>
+                  Give a brief description of your book.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name='price'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Price</FormLabel>
+                <FormControl>
+                  <Input placeholder='400' {...field} />
+                </FormControl>
+                <FormDescription>Your book price in wei</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name='authorAddress'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Author Address</FormLabel>
+                <FormControl>
+                  <Input placeholder='0x...' {...field} />
+                </FormControl>
+                <FormDescription>
+                  Author address of this book ex: 0x...
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <div className='flex flex-col space-y-4 w-full'>
+            <UploadFile onUploadSuccess={setCid} />
+            {cid && (
+              <p className='text-sm text-gray-600'>Uploaded CID: {cid}</p>
+            )}
+            <Button
+              type='submit'
+              className='bg-blue-800 hover:bg-blue-900 text-white font-bold py-2 px-4 rounded-md cursor-pointer'
+              disabled={!isConnected || isConfirming}
+            >
+              {isWritePending || isConfirming
+                ? 'Publishing...'
+                : 'Publish Book'}
+            </Button>
+          </div>
+        </form>
+      </Form>
     </main>
   );
 }

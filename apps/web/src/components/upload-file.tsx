@@ -1,19 +1,26 @@
 'use client';
 
 import { useState } from 'react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
+import { Loader, Trash2 } from 'lucide-react';
 
 interface UploadFileProps {
   onUploadSuccess: (cid: string) => void;
 }
 
 export function UploadFile({ onUploadSuccess }: UploadFileProps) {
-  const [file, setFile] = useState<File>();
+  const [file, setFile] = useState<File | undefined>(undefined);
+  const [selectedFileName, setSelectedFileName] = useState<string | undefined>(
+    undefined,
+  );
   const [uploading, setUploading] = useState(false);
 
   const uploadFile = async () => {
     try {
       if (!file) {
-        alert('No file selected');
+        toast.error('No file selected!');
         return;
       }
 
@@ -24,10 +31,13 @@ export function UploadFile({ onUploadSuccess }: UploadFileProps) {
         method: 'POST',
         body: data,
       });
-      const { cid } = await uploadRequest.json();
-      console.log('Uploaded CID:', cid);
-      onUploadSuccess(cid);
+      const res = await uploadRequest.json();
+      console.log('Uploaded CID:', res);
+      onUploadSuccess(res);
       setUploading(false);
+      if (res) {
+        toast.success('File uploaded successfully!');
+      }
     } catch (e) {
       console.error('Trouble uploading file:', e);
       setUploading(false);
@@ -36,20 +46,69 @@ export function UploadFile({ onUploadSuccess }: UploadFileProps) {
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFile(e.target?.files?.[0]);
+    const selectedFile = e.target?.files?.[0];
+    if (selectedFile && selectedFile.type !== 'application/pdf') {
+      toast.error('Only PDF files are allowed.');
+      e.target.value = ''; // Clear the input
+      setFile(undefined);
+      setSelectedFileName(undefined);
+      return;
+    }
+    setFile(selectedFile);
+    setSelectedFileName(selectedFile ? selectedFile.name : undefined);
+  };
+
+  const handleDeleteFile = () => {
+    setFile(undefined);
+    setSelectedFileName(undefined);
+    // Optionally, clear the file input value if needed
+    const fileInput = document.getElementById(
+      'file-upload-input',
+    ) as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
+    }
+    toast.info('Selected file cleared.');
   };
 
   return (
-    <section className='w-full flex flex-col justify-center items-center'>
-      <input type='file' onChange={handleChange} />
-      <button
-        className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md cursor-pointer'
+    <section className='w-full flex flex-col space-y-2'>
+      <div className='flex items-center space-x-2'>
+        <Input
+          id='file-upload-input'
+          type='file'
+          accept='.pdf'
+          onChange={handleChange}
+          className='flex-grow'
+        />
+        {selectedFileName && (
+          <Button
+            type='button'
+            size='icon'
+            variant='destructive'
+            onClick={handleDeleteFile}
+          >
+            <Trash2 className='h-4 w-4' />
+          </Button>
+        )}
+      </div>
+      {selectedFileName && (
+        <p className='text-sm text-gray-500'>
+          Selected file: {selectedFileName}
+        </p>
+      )}
+      <Button
+        className='cursor-pointer'
         type='button'
-        disabled={uploading}
+        disabled={uploading || !file}
         onClick={uploadFile}
       >
-        {uploading ? 'Uploading...' : 'Upload File'}
-      </button>
+        {uploading ? (
+          <Loader className='h-4 w-4 animate-spin' />
+        ) : (
+          'Upload File'
+        )}
+      </Button>
     </section>
   );
 }

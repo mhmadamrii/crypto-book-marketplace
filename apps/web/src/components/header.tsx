@@ -15,7 +15,7 @@ export default function Header() {
       label: 'Publish',
     },
     {
-      to: '/collections',
+      to: '/my-books',
       label: 'Collections',
     },
   ];
