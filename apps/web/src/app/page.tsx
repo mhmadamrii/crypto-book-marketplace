@@ -38,7 +38,6 @@ export default function Home() {
             >
               <h3 className='font-medium text-lg'>{item.title}</h3>
               <p className='text-sm text-gray-500'>{item.description}</p>
-              <span>{item.id}</span>
             </Link>
           ))}
         </div>
