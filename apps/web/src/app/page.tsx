@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { ABI_BOOK_MARKETPLACE } from '@/lib/constants';
 import { useReadContract } from 'wagmi';
@@ -29,10 +31,15 @@ export default function Home() {
         <h2 className='text-2xl font-semibold mb-4'>Featured Books</h2>
         <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
           {data?.map((item, id) => (
-            <div key={id} className='rounded-lg border p-4'>
+            <Link
+              href={`/books/${item.id}`}
+              key={id}
+              className='rounded-lg border p-4'
+            >
               <h3 className='font-medium text-lg'>{item.title}</h3>
               <p className='text-sm text-gray-500'>{item.description}</p>
-            </div>
+              <span>{item.id}</span>
+            </Link>
           ))}
         </div>
       </section>
