@@ -2,9 +2,12 @@
 
 import { useState } from 'react';
 
-export function UploadFile() {
+interface UploadFileProps {
+  onUploadSuccess: (cid: string) => void;
+}
+
+export function UploadFile({ onUploadSuccess }: UploadFileProps) {
   const [file, setFile] = useState<File>();
-  const [url, setUrl] = useState('');
   const [uploading, setUploading] = useState(false);
 
   const uploadFile = async () => {
@@ -21,12 +24,12 @@ export function UploadFile() {
         method: 'POST',
         body: data,
       });
-      const signedUrl = await uploadRequest.json();
-      console.log('signed url ipfs', signedUrl);
-      setUrl(signedUrl);
+      const { cid } = await uploadRequest.json();
+      console.log('Uploaded CID:', cid);
+      onUploadSuccess(cid);
       setUploading(false);
     } catch (e) {
-      console.log(e);
+      console.error('Trouble uploading file:', e);
       setUploading(false);
       alert('Trouble uploading file');
     }
@@ -45,7 +48,7 @@ export function UploadFile() {
         disabled={uploading}
         onClick={uploadFile}
       >
-        {uploading ? 'Uploading...' : 'Upload'}
+        {uploading ? 'Uploading...' : 'Upload File'}
       </button>
     </section>
   );

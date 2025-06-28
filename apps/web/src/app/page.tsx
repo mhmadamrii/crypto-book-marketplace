@@ -7,13 +7,14 @@ import { useReadContract } from 'wagmi';
 export default function Home() {
   const { data } = useReadContract({
     abi: ABI_BOOK_MARKETPLACE,
-    address: '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512',
+    address: '0x5FbDB2315678afecb367f032d93F642f64180aa3',
     functionName: 'getAllBooks',
   });
 
+  console.log('data', data);
+
   return (
     <div className='container mx-auto max-w-5xl px-4 py-8'>
-      {/* Hero Section */}
       <section className='text-center py-16 w-full flex flex-col items-center justify-center'>
         <h1 className='text-4xl font-bold mb-4'>
           Discover, Collect, and Sell Crypto Books
@@ -24,25 +25,21 @@ export default function Home() {
         <ConnectButton />
       </section>
 
-      {/* Featured Books */}
       <section className='py-8'>
         <h2 className='text-2xl font-semibold mb-4'>Featured Books</h2>
         <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
-          {/* Book 1 */}
           <div className='rounded-lg border p-4'>
             <h3 className='font-medium text-lg'>Mastering Bitcoin</h3>
             <p className='text-sm text-gray-500'>
               Unlocking Digital Cryptocurrencies
             </p>
           </div>
-          {/* Book 2 */}
           <div className='rounded-lg border p-4'>
             <h3 className='font-medium text-lg'>The Internet of Money</h3>
             <p className='text-sm text-gray-500'>
               A collection of talks by Andreas Antonopoulos
             </p>
           </div>
-          {/* Book 3 */}
           <div className='rounded-lg border p-4'>
             <h3 className='font-medium text-lg'>Programming Bitcoin</h3>
             <p className='text-sm text-gray-500'>
@@ -52,18 +49,15 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Testimonials */}
       <section className='py-8'>
         <h2 className='text-2xl font-semibold mb-4'>Testimonials</h2>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-          {/* Testimonial 1 */}
           <div className='rounded-lg border p-4'>
             <p className='text-sm italic text-gray-700 mb-2'>
               "Great platform for discovering new crypto books!"
             </p>
             <p className='text-xs font-medium'>- John Doe</p>
           </div>
-          {/* Testimonial 2 */}
           <div className='rounded-lg border p-4'>
             <p className='text-sm italic text-gray-700 mb-2'>
               "Easy to use and a great selection of books."

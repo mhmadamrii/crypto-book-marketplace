@@ -109,6 +109,11 @@ export const ABI_BOOK_MARKETPLACE = [
       },
       {
         internalType: 'string',
+        name: 'description',
+        type: 'string',
+      },
+      {
+        internalType: 'string',
         name: 'cid',
         type: 'string',
       },
@@ -116,6 +121,11 @@ export const ABI_BOOK_MARKETPLACE = [
         internalType: 'uint256',
         name: 'price',
         type: 'uint256',
+      },
+      {
+        internalType: 'address payable',
+        name: 'authorAddress',
+        type: 'address',
       },
     ],
     name: 'addBook',
@@ -139,13 +149,23 @@ export const ABI_BOOK_MARKETPLACE = [
         type: 'uint256',
       },
       {
-        internalType: 'address',
-        name: 'author',
+        internalType: 'address payable',
+        name: 'uploader',
+        type: 'address',
+      },
+      {
+        internalType: 'address payable',
+        name: 'authorAddress',
         type: 'address',
       },
       {
         internalType: 'string',
         name: 'title',
+        type: 'string',
+      },
+      {
+        internalType: 'string',
+        name: 'description',
         type: 'string',
       },
       {
@@ -174,13 +194,23 @@ export const ABI_BOOK_MARKETPLACE = [
             type: 'uint256',
           },
           {
-            internalType: 'address',
-            name: 'author',
+            internalType: 'address payable',
+            name: 'uploader',
+            type: 'address',
+          },
+          {
+            internalType: 'address payable',
+            name: 'authorAddress',
             type: 'address',
           },
           {
             internalType: 'string',
             name: 'title',
+            type: 'string',
+          },
+          {
+            internalType: 'string',
+            name: 'description',
             type: 'string',
           },
           {
@@ -220,13 +250,23 @@ export const ABI_BOOK_MARKETPLACE = [
             type: 'uint256',
           },
           {
-            internalType: 'address',
-            name: 'author',
+            internalType: 'address payable',
+            name: 'uploader',
+            type: 'address',
+          },
+          {
+            internalType: 'address payable',
+            name: 'authorAddress',
             type: 'address',
           },
           {
             internalType: 'string',
             name: 'title',
+            type: 'string',
+          },
+          {
+            internalType: 'string',
+            name: 'description',
             type: 'string',
           },
           {
