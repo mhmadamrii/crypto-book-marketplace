@@ -1,7 +1,10 @@
 'use client';
 
+import { config } from '@/lib/wagmi/config';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
+import { Loader } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { UploadFile } from '@/components/upload-file';
@@ -10,6 +13,7 @@ import { toast } from 'sonner';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
+import { waitForTransactionReceipt } from '@wagmi/core';
 import { ABI_BOOK_MARKETPLACE } from '@/lib/constants';
 
 import {
@@ -44,12 +48,14 @@ const FormSchema = z.object({
 });
 
 export default function Publish() {
+  const router = useRouter();
   const { address, isConnected } = useAccount();
   const [cid, setCid] = useState('');
 
   const {
     data: hash,
     writeContract,
+    isSuccess,
     isPending: isWritePending,
     error: writeError,
   } = useWriteContract();
@@ -72,20 +78,41 @@ export default function Publish() {
     },
   });
 
+  const handleTransactionSubmitted = async (txHash: string) => {
+    const transactionReceipt = await waitForTransactionReceipt(config, {
+      hash: txHash as `0x${string}`,
+    });
+    console.log('transactionReceipt', transactionReceipt);
+
+    if (transactionReceipt.status === 'success') {
+      toast.success('Transaction successful!');
+      router.push('/');
+    }
+  };
+
   function onSubmit(data: z.infer<typeof FormSchema>) {
+    if (!cid) {
+      toast.error('Please upload a PDF file.');
+      return;
+    }
     try {
-      writeContract({
-        address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as '0x',
-        abi: ABI_BOOK_MARKETPLACE,
-        functionName: 'addBook',
-        args: [
-          data.title,
-          data.desc,
-          cid,
-          parseEther(data.price.toString()),
-          data.authorAddress as '0x',
-        ],
-      });
+      writeContract(
+        {
+          address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as '0x',
+          abi: ABI_BOOK_MARKETPLACE,
+          functionName: 'addBook',
+          args: [
+            data.title,
+            data.desc,
+            cid,
+            parseEther(data.price.toString()),
+            data.authorAddress as '0x',
+          ],
+        },
+        {
+          onSuccess: handleTransactionSubmitted,
+        },
+      );
     } catch (e) {
       console.error('Error preparing transaction:', e);
       toast.error('Error preparing transaction.');
@@ -95,7 +122,7 @@ export default function Publish() {
   console.log('current address', address);
 
   return (
-    <main className='min-h-screen flex flex-col items-center justify-center pb-16'>
+    <main className='min-h-screen flex flex-col items-center justify-center py-16'>
       <div className='text-lg font-bold mb-4'>
         <h1>Publish your crypto book here!</h1>
       </div>
@@ -178,9 +205,11 @@ export default function Publish() {
               className='bg-blue-800 hover:bg-blue-900 text-white font-bold py-2 px-4 rounded-md cursor-pointer'
               disabled={!isConnected || isConfirming}
             >
-              {isWritePending || isConfirming
-                ? 'Publishing...'
-                : 'Publish Book'}
+              {isWritePending || isConfirming ? (
+                <Loader className='animate-spin' />
+              ) : (
+                'Publish Book'
+              )}
             </Button>
           </div>
         </form>

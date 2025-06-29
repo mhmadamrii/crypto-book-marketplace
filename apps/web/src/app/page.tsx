@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { ABI_BOOK_MARKETPLACE } from '@/lib/constants';
 import { useReadContract } from 'wagmi';
+import { formatEther } from 'viem';
 
 export default function Home() {
   const { data } = useReadContract({
@@ -37,7 +38,12 @@ export default function Home() {
               className='rounded-lg border p-4'
             >
               <h3 className='font-medium text-lg'>{item.title}</h3>
-              <p className='text-sm text-gray-500'>{item.description}</p>
+              <p className='text-sm text-gray-500 truncate max-w-full'>
+                {item.description}
+              </p>
+              <p className='text-lg font-semibold'>
+                {formatEther(item.price)} ETH
+              </p>
             </Link>
           ))}
         </div>

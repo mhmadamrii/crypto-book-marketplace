@@ -20,6 +20,7 @@ contract BookMarketplace is Ownable, ReentrancyGuard {
     mapping(address => uint256[]) public userPurchases;
 
     event BookPurchased(uint256 indexed bookId, address indexed buyer);
+    event BookDeleted(uint256 indexed bookId);
     event BookListed(
         uint256 indexed bookId,
         address indexed author,
@@ -85,5 +86,16 @@ contract BookMarketplace is Ownable, ReentrancyGuard {
 
     function getBook(uint256 bookId) external view returns (Book memory) {
         return books[bookId];
+    }
+
+    function deleteBook(uint256 bookId) external {
+        require(books[bookId].uploader != address(0), "Book does not exist");
+        require(
+            books[bookId].uploader == msg.sender || owner() == msg.sender,
+            "Only uploader or owner can delete this book"
+        );
+
+        delete books[bookId];
+        emit BookDeleted(bookId);
     }
 }

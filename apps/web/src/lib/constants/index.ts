@@ -40,6 +40,19 @@ export const ABI_BOOK_MARKETPLACE = [
         name: 'bookId',
         type: 'uint256',
       },
+    ],
+    name: 'BookDeleted',
+    type: 'event',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: 'uint256',
+        name: 'bookId',
+        type: 'uint256',
+      },
       {
         indexed: true,
         internalType: 'address',
@@ -180,6 +193,19 @@ export const ABI_BOOK_MARKETPLACE = [
       },
     ],
     stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: 'bookId',
+        type: 'uint256',
+      },
+    ],
+    name: 'deleteBook',
+    outputs: [],
+    stateMutability: 'nonpayable',
     type: 'function',
   },
   {
