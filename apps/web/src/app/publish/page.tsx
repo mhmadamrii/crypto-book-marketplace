@@ -8,7 +8,7 @@ import { Loader } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { UploadFile } from '@/components/upload-file';
-import { parseEther } from 'viem';
+import { parseEther, parseUnits } from 'viem';
 import { toast } from 'sonner';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -27,30 +27,58 @@ import {
 } from '@/components/ui/form';
 
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+
+import {
   useWriteContract,
   useWaitForTransactionReceipt,
   useAccount,
 } from 'wagmi';
 
-const FormSchema = z.object({
-  title: z.string().min(2, {
-    message: 'Title must be at least 2 characters.',
-  }),
-  desc: z.string().min(2, {
-    message: 'Description must be at least 2 characters.',
-  }),
-  price: z.coerce.number().min(1, {
-    message: 'Price must be at least 1 Wei.',
-  }),
-  authorAddress: z.string().regex(/^0x[a-fA-F0-9]{40}$/, {
-    message: 'Author address must be a valid Ethereum address (e.g., 0x...).',
-  }),
-});
+const FormSchema = z
+  .object({
+    title: z.string().min(2, {
+      message: 'Title must be at least 2 characters.',
+    }),
+    desc: z
+      .string()
+      .min(2, {
+        message: 'Description must be at least 2 characters.',
+      })
+      .max(50, {
+        message: 'Description must be at most 50 characters.',
+      }),
+    price: z.coerce.number(),
+    priceUnit: z.enum(['wei', 'ether']),
+    authorAddress: z.string().regex(/^0x[a-fA-F0-9]{40}$/, {
+      message: 'Author address must be a valid Ethereum address (e.g., 0x...).',
+    }),
+  })
+  .refine(
+    ({ price, priceUnit }) => {
+      try {
+        const wei = priceUnit === 'ether' ? BigInt(parseEther(price.toString()).toString()) : BigInt(Math.floor(price)); // prettier-ignore
+
+        return wei >= BigInt(5);
+      } catch (e) {
+        return false;
+      }
+    },
+    {
+      message: 'Price must be at least 5 wei.',
+      path: ['price'],
+    },
+  );
 
 export default function Publish() {
   const router = useRouter();
   const { address, isConnected } = useAccount();
-  const [cid, setCid] = useState('');
+  const [ipfsUrl, setIpfsUrl] = useState('');
 
   const {
     data: hash,
@@ -74,6 +102,7 @@ export default function Publish() {
       title: '',
       desc: '',
       price: 0,
+      priceUnit: 'ether',
       authorAddress: '',
     },
   });
@@ -91,11 +120,13 @@ export default function Publish() {
   };
 
   function onSubmit(data: z.infer<typeof FormSchema>) {
-    if (!cid) {
-      toast.error('Please upload a PDF file.');
-      return;
-    }
+    // if (!ipfsUrl) {
+    //   toast.error('Please upload a PDF file.');
+    //   return;
+    // }
     try {
+      const priceInWei = data.priceUnit === 'ether' ? parseEther(data.price.toString()) : parseUnits(data.price.toString(), 0); // prettier-ignore
+
       writeContract(
         {
           address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as '0x',
@@ -104,8 +135,8 @@ export default function Publish() {
           args: [
             data.title,
             data.desc,
-            cid,
-            parseEther(data.price.toString()),
+            ipfsUrl,
+            priceInWei,
             data.authorAddress as '0x',
           ],
         },
@@ -138,7 +169,11 @@ export default function Publish() {
               <FormItem>
                 <FormLabel>Book Title</FormLabel>
                 <FormControl>
-                  <Input placeholder='Crypto Beginner Guide' {...field} />
+                  <Input
+                    disabled={isConfirming}
+                    placeholder='Crypto Beginner Guide'
+                    {...field}
+                  />
                 </FormControl>
                 <FormDescription>Your book title</FormDescription>
                 <FormMessage />
@@ -165,20 +200,47 @@ export default function Publish() {
               </FormItem>
             )}
           />
-          <FormField
-            control={form.control}
-            name='price'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Price</FormLabel>
-                <FormControl>
-                  <Input placeholder='400' {...field} />
-                </FormControl>
-                <FormDescription>Your book price in wei</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className='flex gap-4'>
+            <FormField
+              control={form.control}
+              name='price'
+              render={({ field }) => (
+                <FormItem className='w-full'>
+                  <FormLabel>Price</FormLabel>
+                  <FormControl>
+                    <Input type='number' placeholder='400' {...field} />
+                  </FormControl>
+                  <FormDescription>Your book price</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name='priceUnit'
+              render={({ field }) => (
+                <FormItem className='w-full'>
+                  <FormLabel>Unit</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder='Select a unit' />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value='ether'>Ether</SelectItem>
+                      <SelectItem value='wei'>Wei</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>Your price unit</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
           <FormField
             control={form.control}
             name='authorAddress'
@@ -196,9 +258,9 @@ export default function Publish() {
             )}
           />
           <div className='flex flex-col space-y-4 w-full'>
-            <UploadFile onUploadSuccess={setCid} />
-            {cid && (
-              <p className='text-sm text-gray-600'>Uploaded CID: {cid}</p>
+            <UploadFile onUploadSuccess={setIpfsUrl} />
+            {ipfsUrl && (
+              <p className='text-sm text-gray-600'>Uploaded Url: {ipfsUrl}</p>
             )}
             <Button
               type='submit'

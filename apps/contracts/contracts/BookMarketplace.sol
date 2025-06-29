@@ -11,7 +11,7 @@ contract BookMarketplace is Ownable, ReentrancyGuard {
         address payable authorAddress;
         string title;
         string description;
-        string cid; // IPFS CID
+        string url; // IPFS url
         uint256 price;
     }
 
@@ -33,7 +33,7 @@ contract BookMarketplace is Ownable, ReentrancyGuard {
     function addBook(
         string memory title,
         string memory description,
-        string memory cid,
+        string memory url,
         uint256 price,
         address payable authorAddress
     ) external {
@@ -47,7 +47,7 @@ contract BookMarketplace is Ownable, ReentrancyGuard {
             authorAddress,
             title,
             description,
-            cid,
+            url,
             price
         );
 

@@ -2,12 +2,11 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-
-import { PDFViewer } from '@/components/pdf-viewer';
 import { Button } from '@/components/ui/button';
 import { ABI_BOOK_MARKETPLACE } from '@/lib/constants';
 import { useAccount, useReadContract, useWriteContract } from 'wagmi';
 import { toast } from 'sonner';
+import { formatEther } from 'viem';
 
 export function BookDetail({ id }: { id: string }) {
   const router = useRouter();
@@ -51,21 +50,26 @@ export function BookDetail({ id }: { id: string }) {
         <div className='w-full p-6 sm:w-1/2'>
           <h2 className='mb-4 text-2xl font-semibold'>Book Details</h2>
           <div className='space-y-3'>
-            <p>
-              <span className='font-medium'>Title:</span> {book?.title}
-            </p>
-            <p>
-              <span className='font-medium'>Author Address:</span>{' '}
-              {book?.authorAddress}
-            </p>
-            <p>
-              <span className='font-medium'>Description:</span>{' '}
-              {book?.description}
-            </p>
-            <p>
-              <span className='font-medium'>Price:</span>{' '}
-              {book?.price?.toString()} wei
-            </p>
+            <div>
+              <p className='text-gray-600'>Title:</p>
+              <p>{book?.title}</p>
+            </div>
+            <div>
+              <p className='text-gray-600'>Author Address:</p>
+              <p>{book?.authorAddress}</p>
+            </div>
+            <div>
+              <p className='text-gray-600'>Description:</p>
+              <p>{book?.description}</p>
+            </div>
+            <div>
+              <p className='text-gray-600'>Price:</p>
+              <p>
+                {book?.price
+                  ? `${book.price.toString()} wei / ${formatEther(book.price)} ETH`
+                  : '0'}
+              </p>
+            </div>
           </div>
           <Button className='cursor-pointer'>Buy This Book</Button>
           {isAuthor && (

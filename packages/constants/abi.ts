@@ -40,6 +40,19 @@ export const ABI_BOOK_MARKETPLACE = [
         name: "bookId",
         type: "uint256",
       },
+    ],
+    name: "BookDeleted",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "uint256",
+        name: "bookId",
+        type: "uint256",
+      },
       {
         indexed: true,
         internalType: "address",
@@ -109,13 +122,23 @@ export const ABI_BOOK_MARKETPLACE = [
       },
       {
         internalType: "string",
-        name: "cid",
+        name: "description",
+        type: "string",
+      },
+      {
+        internalType: "string",
+        name: "url",
         type: "string",
       },
       {
         internalType: "uint256",
         name: "price",
         type: "uint256",
+      },
+      {
+        internalType: "address payable",
+        name: "authorAddress",
+        type: "address",
       },
     ],
     name: "addBook",
@@ -139,8 +162,13 @@ export const ABI_BOOK_MARKETPLACE = [
         type: "uint256",
       },
       {
-        internalType: "address",
-        name: "author",
+        internalType: "address payable",
+        name: "uploader",
+        type: "address",
+      },
+      {
+        internalType: "address payable",
+        name: "authorAddress",
         type: "address",
       },
       {
@@ -150,7 +178,12 @@ export const ABI_BOOK_MARKETPLACE = [
       },
       {
         internalType: "string",
-        name: "cid",
+        name: "description",
+        type: "string",
+      },
+      {
+        internalType: "string",
+        name: "url",
         type: "string",
       },
       {
@@ -160,6 +193,19 @@ export const ABI_BOOK_MARKETPLACE = [
       },
     ],
     stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "bookId",
+        type: "uint256",
+      },
+    ],
+    name: "deleteBook",
+    outputs: [],
+    stateMutability: "nonpayable",
     type: "function",
   },
   {
@@ -174,8 +220,13 @@ export const ABI_BOOK_MARKETPLACE = [
             type: "uint256",
           },
           {
-            internalType: "address",
-            name: "author",
+            internalType: "address payable",
+            name: "uploader",
+            type: "address",
+          },
+          {
+            internalType: "address payable",
+            name: "authorAddress",
             type: "address",
           },
           {
@@ -185,7 +236,12 @@ export const ABI_BOOK_MARKETPLACE = [
           },
           {
             internalType: "string",
-            name: "cid",
+            name: "description",
+            type: "string",
+          },
+          {
+            internalType: "string",
+            name: "url",
             type: "string",
           },
           {
@@ -220,8 +276,13 @@ export const ABI_BOOK_MARKETPLACE = [
             type: "uint256",
           },
           {
-            internalType: "address",
-            name: "author",
+            internalType: "address payable",
+            name: "uploader",
+            type: "address",
+          },
+          {
+            internalType: "address payable",
+            name: "authorAddress",
             type: "address",
           },
           {
@@ -231,7 +292,12 @@ export const ABI_BOOK_MARKETPLACE = [
           },
           {
             internalType: "string",
-            name: "cid",
+            name: "description",
+            type: "string",
+          },
+          {
+            internalType: "string",
+            name: "url",
             type: "string",
           },
           {

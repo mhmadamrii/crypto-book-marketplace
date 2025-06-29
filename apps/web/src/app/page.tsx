@@ -31,21 +31,23 @@ export default function Home() {
       <section className='py-8'>
         <h2 className='text-2xl font-semibold mb-4'>Featured Books</h2>
         <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
-          {data?.map((item, id) => (
-            <Link
-              href={`/books/${item.id}`}
-              key={id}
-              className='rounded-lg border p-4'
-            >
-              <h3 className='font-medium text-lg'>{item.title}</h3>
-              <p className='text-sm text-gray-500 truncate max-w-full'>
-                {item.description}
-              </p>
-              <p className='text-lg font-semibold'>
-                {formatEther(item.price)} ETH
-              </p>
-            </Link>
-          ))}
+          {data
+            ?.filter((book) => book.title !== '')
+            ?.map((item, id) => (
+              <Link
+                href={`/books/${item.id}`}
+                key={id}
+                className='rounded-lg border p-4'
+              >
+                <h3 className='font-medium truncate text-lg'>{item.title}</h3>
+                <p className='text-sm text-gray-500 truncate max-w-full'>
+                  {item.description}
+                </p>
+                <p className='text-lg font-semibold'>
+                  {formatEther(item.price)} ETH
+                </p>
+              </Link>
+            ))}
         </div>
       </section>
 
@@ -53,13 +55,13 @@ export default function Home() {
         <h2 className='text-2xl font-semibold mb-4'>Testimonials</h2>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
           <div className='rounded-lg border p-4'>
-            <p className='text-sm italic text-gray-700 mb-2'>
+            <p className='text-sm italic text-gray-600 mb-2'>
               "Great platform for discovering new crypto books!"
             </p>
             <p className='text-xs font-medium'>- John Doe</p>
           </div>
           <div className='rounded-lg border p-4'>
-            <p className='text-sm italic text-gray-700 mb-2'>
+            <p className='text-sm italic text-gray-600 mb-2'>
               "Easy to use and a great selection of books."
             </p>
             <p className='text-xs font-medium'>- Jane Smith</p>
