@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 
 export function BookDetail({ id }: { id: string }) {
   const router = useRouter();
+
   const { address } = useAccount();
   const { data: book, refetch } = useReadContract({
     abi: ABI_BOOK_MARKETPLACE,
@@ -18,6 +19,7 @@ export function BookDetail({ id }: { id: string }) {
     functionName: 'getBook',
     args: [BigInt(id)],
   });
+
   const {
     data: hash,
     writeContract,
@@ -79,10 +81,11 @@ export function BookDetail({ id }: { id: string }) {
         </div>
 
         <div className='relative h-full w-full rounded-b-lg sm:rounded-r-lg sm:w-1/2 sm:rounded-bl-none'>
+          <div className='bg-background bottom-0 absolute top-0 right-0 left-0 opacity-30'></div>
           <div className='pointer-events-none text-center absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rotate-[-45deg] text-6xl font-bold uppercase text-gray-900 opacity-30 z-10'>
             Copyright Crypto Book
             <span className='block'>Alright reserved</span>
-            <span className='block'>🤡🤡🤡����🤡</span>
+            <span className='block'>🤡🤡🤡</span>
           </div>
 
           {book?.cid ? (

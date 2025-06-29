@@ -122,14 +122,14 @@ export default function Publish() {
   console.log('current address', address);
 
   return (
-    <main className='min-h-screen flex flex-col items-center justify-center py-16'>
+    <main className='container mx-auto max-w-5xl flex justify-center flex-col items-center px-4 py-8'>
       <div className='text-lg font-bold mb-4'>
         <h1>Publish your crypto book here!</h1>
       </div>
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className='w-full sm:max-w-xl space-y-6'
+          className='w-full sm:max-w-xl space-y-6 font-semibold'
         >
           <FormField
             control={form.control}
