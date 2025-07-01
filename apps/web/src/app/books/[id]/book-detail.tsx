@@ -6,7 +6,9 @@ import { Button } from '@/components/ui/button';
 import { ABI_BOOK_MARKETPLACE } from '@/lib/constants';
 import { useAccount, useReadContract, useWriteContract } from 'wagmi';
 import { toast } from 'sonner';
-import { formatEther } from 'viem';
+import { ContractFunctionExecutionError, formatEther } from 'viem';
+import { waitForTransactionReceipt } from '@wagmi/core';
+import { config } from '@/lib/wagmi/config';
 
 export function BookDetail({ id }: { id: string }) {
   const router = useRouter();
@@ -22,8 +24,8 @@ export function BookDetail({ id }: { id: string }) {
   const {
     data: hash,
     writeContract,
-    isPending: isDeleting,
-    isSuccess: isDeleted,
+    isPending,
+    isSuccess,
   } = useWriteContract();
 
   const isAuthor = address === book?.authorAddress;
@@ -37,12 +39,52 @@ export function BookDetail({ id }: { id: string }) {
     });
   };
 
-  useEffect(() => {
-    if (isDeleted) {
-      toast.success('Book deleted successfully');
-      router.push('/');
+  const handleTransactionSubmitted = async (txHash: string) => {
+    const transactionReceipt = await waitForTransactionReceipt(config, {
+      hash: txHash as `0x${string}`,
+    });
+    console.log('transactionReceipt', transactionReceipt);
+
+    if (transactionReceipt.status === 'success') {
+      toast.success('Transaction successful!');
+      // router.push('/my-books');
     }
-  }, [isDeleted]);
+  };
+  console.log(book);
+
+  const handlePurchaseBook = () => {
+    console.log('clicked');
+    try {
+      writeContract(
+        {
+          address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as '0x',
+          abi: ABI_BOOK_MARKETPLACE,
+          functionName: 'purchaseBook',
+          args: [BigInt(id)],
+          value: book?.price,
+        },
+        {
+          onSuccess: handleTransactionSubmitted,
+          onError: (error: any) => {
+            toast.error('Error purchasing book');
+            if (error instanceof ContractFunctionExecutionError) {
+              console.error('Reason:', error.shortMessage);
+            }
+            console.log('error', error);
+          },
+        },
+      );
+    } catch (error) {
+      console.log('error', error);
+    }
+  };
+
+  useEffect(() => {
+    if (isSuccess) {
+      toast.success('Book deleted successfully');
+      // router.push('/');
+    }
+  }, [isSuccess]);
 
   return (
     <section className='container mx-auto p-6'>
@@ -71,15 +113,17 @@ export function BookDetail({ id }: { id: string }) {
               </p>
             </div>
           </div>
-          <Button className='cursor-pointer'>Buy This Book</Button>
+          <Button onClick={handlePurchaseBook} className='cursor-pointer'>
+            Buy This Book
+          </Button>
           {isAuthor && (
             <Button
               variant='destructive'
               className='ml-2 cursor-pointer'
               onClick={handleDelete}
-              disabled={isDeleting}
+              disabled={isPending}
             >
-              {isDeleting ? 'Deleting...' : 'Delete Book'}
+              {isPending ? 'Deleting...' : 'Delete Book'}
             </Button>
           )}
         </div>

@@ -70,7 +70,10 @@ export default function Home() {
         <div className='mt-6 text-center'>
           <p className='text-sm text-gray-600'>
             Earn 500 Wei by creating a testimonial.{' '}
-            <Link href='/create-testimonial' className='text-blue-500 hover:underline'>
+            <Link
+              href='/create-testimonial'
+              className='text-blue-500 hover:underline'
+            >
               Click here
             </Link>
           </p>

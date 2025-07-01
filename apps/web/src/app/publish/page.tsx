@@ -120,10 +120,10 @@ export default function Publish() {
   };
 
   function onSubmit(data: z.infer<typeof FormSchema>) {
-    // if (!ipfsUrl) {
-    //   toast.error('Please upload a PDF file.');
-    //   return;
-    // }
+    if (!ipfsUrl) {
+      toast.error('Please upload a PDF file.');
+      return;
+    }
     try {
       const priceInWei = data.priceUnit === 'ether' ? parseEther(data.price.toString()) : parseUnits(data.price.toString(), 0); // prettier-ignore
 

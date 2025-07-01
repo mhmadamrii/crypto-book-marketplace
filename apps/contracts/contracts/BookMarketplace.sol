@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.28;
 
+import "hardhat/console.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
@@ -72,8 +73,15 @@ contract BookMarketplace is Ownable, ReentrancyGuard {
         emit BookPurchased(bookId, msg.sender);
     }
 
-    function getMyBooks() external view returns (uint256[] memory) {
-        return userPurchases[msg.sender];
+    function getMyBooks() external view returns (Book[] memory) {
+        uint256[] memory purchasedBookIds = userPurchases[msg.sender];
+        Book[] memory myBooks = new Book[](purchasedBookIds.length);
+
+        for (uint i = 0; i < purchasedBookIds.length; i++) {
+            myBooks[i] = books[purchasedBookIds[i]];
+        }
+
+        return myBooks;
     }
 
     function getAllBooks() external view returns (Book[] memory) {
